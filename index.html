@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Subathon Counter</title>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+
+    <link rel="stylesheet" type="text/css" href="./style.css?v=1" />
+    <script defer src="./tmi.min.js?v=1"></script>
+    <script defer src="./script.js?v=1"></script>
+</head>
+
+<body>
+    <a id="exportFile" style="display: none"></a>
+    <input type="file" id="importFile" accept=".json" style="display: none;" />
+
+    <div class="counters">
+        <div class="counter">
+            <span class="formatted-output" data-node="timeFormatted">
+                00:00:00
+            </span>
+        </div>
+        <div class="counter duration">
+            <span class="formatted-output" data-node="durationFormatted">
+                00:00:00
+            </span>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="counter-info">
+            <strong>Subathon time left and current duration of the subathon.</strong>
+        </div>
+
+        <div class="timer-controls">
+            <button class="confirm-button" data-node="timerStart">
+                <span class="emoji">🟢</span>
+                <span class="confirm">Are you sure?</span>
+                <span class="normal">Start</span>
+            </button>
+            <button class="confirm-button" data-node="timerPause">
+                <span class="emoji">🟡</span>
+                <span class="confirm">Are you sure?</span>
+                <span class="normal">Pause</span>
+            </button>
+            <button class="confirm-button" data-node="timerResume">
+                <span class="emoji">🟡</span>
+                <span class="confirm">Are you sure?</span>
+                <span class="normal">Resume</span>
+            </button>
+            <button class="confirm-button" data-node="timerStop">
+                <span class="emoji">🔴</span>
+                <span class="confirm">Are you sure?</span>
+                <span class="normal">Stop and reset</span>
+            </button>
+
+            <div class="channel">
+                Channel name to monitor <input type="text" placeholder="the_best_streamer" data-node="channelName" />
+            </div>
+            <div class="timerStartValue">
+                Initial timer value <input type="text" class="timeCode" placeholder="00:00:00" data-node="initTimerValue" />
+            </div>
+            <div class="autoStopOnZero">
+                <label>
+                    <input type="checkbox" data-node="stopTimerOnZero" /> Auto stop once the subathon timer reaches 0 seconds.
+                </label>
+            </div>
+        </div>
+
+
+        <div class="time-rules">
+            <h2>Rules</h2>
+            <div class="help">
+                The time rules define how much a time each sub increases the timer.<br />
+                A rule of 00:00:00 acts as the start value.<br />
+                Once the timer starts, you cannot change the rules.
+            </div>
+
+            <button data-node="newRule"><span class="emoji">⏲</span> New Rule</button>
+            <button data-node="saveRules"><span class="emoji">💾</span> Save Rules</button>
+            <button data-node="exportRules"><span class="emoji">🔼</span> Export Rules</button>
+            <button class="hasLabel" data-node="importRules"><label for="importFile"><span class="emoji">🔽</span> Import Rules</label></button>
+
+            <div class="rules" data-node="timeRules">
+                <div class="rule" data-node="ruleTemplate" style="display: none">
+                    <button class="removeTimeRule confirm-button" data-node="removeTimeRule">
+                        <span class="emoji">🗑</span>
+                        <span class="confirm">Are you sure?</span>
+                        <span class="normal">Remove</span>
+                    </button>
+
+                    Once
+                    <input type="text" placeholder="00:00:00" class="timeCode" data-node="timeCode">
+                    is reached/passed, a sub adds
+                    <input type="text" placeholder="0" class="timeValue" data-node="timeValue">
+                    <select class="timeUnit" data-node="timeUnit">
+                        <option value="h">Hours</option>
+                        <option value="m">Minutes</option>
+                        <option value="s">Seconds</option>
+                    </select>
+                    to the timer
+                </div>
+            </div>
+        </div>
+
+        <div class="time-manipulation">
+            <h2>Manipulation</h2>
+
+            <div>
+                <input class="timeCode" type="text" placeholder="00:00:00" data-node="timeManipulationValue" />
+                <button class="confirm-button" data-node="addTime">
+                    <span class="emoji">➕</span>
+                    <span class="confirm">Are you sure?</span>
+                    <span class="normal">Add time</span>
+                </button>
+
+                <button class="confirm-button" data-node="removeTime">
+                    <span class="emoji">➖</span>
+                    <span class="confirm">Are you sure?</span>
+                    <span class="normal">Remove time</span>
+                </button>
+
+                <button class="confirm-button" data-node="setTime">
+                    <span class="emoji">🕖</span>
+                    <span class="confirm">Are you sure?</span>
+                    <span class="normal">Set to value</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

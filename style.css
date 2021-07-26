@@ -1,0 +1,139 @@
+:root {
+    --counter-font-size: 40px;
+    --counter-font-family: 'Consolas';
+    --counter-font-color: #ffffff;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Helvetica;
+}
+
+button {
+    padding: 5px 10px;
+    width: 140px;
+    margin-bottom: 5px;
+}
+
+button.hasLabel {
+    padding: 0;
+}
+
+button.hasLabel label {
+    display: block;
+    padding: 5px 10px;
+}
+
+input {
+    padding: 5px 10px;
+}
+
+button[disabled], button[disabled] label, input[disabled], select[disabled] {
+    cursor: not-allowed
+}
+
+select {
+    padding: 5px 10px;
+}
+
+.emoji {
+    font-weight: 400;
+    font-family: apple color emoji, segoe ui emoji, noto color emoji, android emoji, emojisymbols, emojione mozilla, twemoji mozilla, segoe ui symbol;
+}
+
+.counters {
+    background: #00FF00;
+    display: inline-block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.formatted-output {
+    color: var(--counter-font-color);
+    font-smooth: never;
+    -webkit-font-smoothing: none;
+}
+
+.counter {
+    padding: 20px 40px;
+    color: black;
+    font-size: var(--counter-font-size);
+    font-family: var(--counter-font-family);
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.counter-info {
+    margin: 10px 0 25px 0;
+}
+
+.content {
+    margin-top: 80px;
+    padding: 10px;
+}
+
+.channel, .autoStopOnZero {
+    margin: 10px 0;
+}
+
+.time-rules, .time-manipulation {
+    margin-top: 30px;
+}
+
+.help {
+    margin-bottom: 20px;
+}
+
+.rules {
+    margin: 20px 0;
+}
+
+.rule {
+    margin: 10px 0;
+}
+
+.rule.active, .rule.active input, .rule.active select {
+    color: blue;
+}
+
+.rule.active:after {
+    content: ' 👈';
+    font-weight: 400;
+    font-family: apple color emoji, segoe ui emoji, noto color emoji, android emoji, emojisymbols, emojione mozilla, twemoji mozilla, segoe ui symbol;
+}
+
+.timeCode {
+    width: 75px;
+    text-align: center;
+    padding: 5px 0;
+}
+
+.timeValue {
+    width: 30px;
+    text-align: center;
+    padding: 5px 0;
+}
+
+.removeTimeRule {
+    margin-right: 15px;
+    color: red;
+    font-weight: bold;
+}
+
+.confirm-button:not(.confirm) .confirm {
+    display: none;
+}
+
+.confirm-button.confirm .confirm {
+    display: inline;
+}
+
+.confirm-button.confirm .normal {
+    display: none;
+}
