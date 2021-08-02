@@ -1,13 +1,6 @@
-const STORAGE_NAME_TIMER_STATE = 'SubCounter_TimerState';
-const STORAGE_NAME_RULES = 'SubCounter_TimeRules';
-const STORAGE_NAME_CHANNEL_NAME = 'SubCounter_ChannelName';
-const STORAGE_NAME_INIT_TIME = 'SubCounter_InitTimerValue';
-const STORAGE_NAME_STOP_ON_ZERO = 'SubCounter_StopTimerOnZero';
-const STORAGE_NAME_SUBATHON_TIME = 'SubCounter_SubathonTime';
-const STORAGE_NAME_SUBATHON_DURATION = 'SubCounter_SubathonDuration';
-const STORAGE_NAME_SUBATHON_RULE_INDEX = 'SubCounter_SubathonRuleIndex';
+import { handleConfirmButton, animateError, getArrayNextIndexSafe, tryAndParseTimeCode, formatSecondsToTimecode, getTotalSecondsWithUnit } from './util.js';
+import { saveToStorage, loadFromStorage } from './storage.js';
 
-const confirmTimeouts = {};
 let queueProcessorInterval;
 let everySecondInterval;
 
@@ -394,37 +387,6 @@ const loadStorageDataIfAny = function ()
 
 
 /**
- * Helper for the confirm buttons
- * @param {string} id 
- * @param {HTMLButtonElement} button 
- */
-const handleConfirmButton = function (id, button)
-{
-    if (!button.classList.contains('confirm'))
-    {
-        button.classList.add('confirm');
-        confirmTimeouts[id] = setTimeout(() =>
-        {
-            button.classList.remove('confirm');
-
-            clearTimeout(confirmTimeouts[id]);
-            delete confirmTimeouts[id];
-        }, 2000);
-        return false;
-    }
-
-    if (confirmTimeouts[id] != null)
-    {
-        button.classList.remove('confirm');
-        clearTimeout(confirmTimeouts[id]);
-        delete confirmTimeouts[id];
-    }
-
-    return true;
-}
-
-
-/**
  * Binds event listeneres to controls
  */
 const setElementEventListeners = function ()
@@ -505,6 +467,7 @@ const setElementEventListeners = function ()
         if (isNaN(newValue))
         {
             e.target.value = formatSecondsToTimecode(0);
+            animateError(e.target);
             return;
         }
 
@@ -513,13 +476,19 @@ const setElementEventListeners = function ()
         e.target.dataset.seconds = newValue;
     });
 
-    buttonNewRule.addEventListener('click', e =>
+    buttonNewRule.addEventListener('click', () =>
     {
         const index = timeRules.length;
+        let tempThreshold = 0;
+
+        if (index > 0)
+        {
+            tempThreshold = timeRules[index - 1].threshold + 30
+        }
 
         timeRules.push({
             index: index,
-            threshold: 0,
+            threshold: tempThreshold,
             value: 5,
             unit: 'm'
         });
@@ -608,6 +577,10 @@ const setElementEventListeners = function ()
             subathonTimeLeftInSeconds = tranform(subathonTimeLeftInSeconds, manipulateValue);
             setTimerContent(subathonTimeLeftInSeconds);
             saveToStorage({ subathonTimeLeftInSeconds: subathonTimeLeftInSeconds });
+        }
+        else
+        {
+            animateError(inputManipulateValue);
         }
 
         inputManipulateValue.value = '';
@@ -716,22 +689,6 @@ const queueProcessorLogic = function ()
 
 
 /**
- * Helper for safly getting the next array index
- * @param {number} current 
- * @param {number} arrayLenght 
- */
-const getArrayNextIndexSafe = function (current, arrayLenght)
-{
-    if (current + 1 <= arrayLenght - 1)
-    {
-        return current + 1;
-    }
-
-    return current;
-}
-
-
-/**
  * Updates the timer text
  * @param {number} seconds 
  */
@@ -757,9 +714,14 @@ const setDurationContent = function (seconds)
 const timerStopButtonLogic = function ()
 {
     timerState = "stopped";
-    localStorage.removeItem(STORAGE_NAME_SUBATHON_TIME);
-    localStorage.removeItem(STORAGE_NAME_SUBATHON_DURATION);
-    localStorage.removeItem(STORAGE_NAME_SUBATHON_RULE_INDEX);
+
+    // Delete from storage
+    saveToStorage({
+        subathonTimeLeftInSeconds: null,
+        subathonDurationInSeconds: null,
+        atCurrentRuleIndex: null
+    });
+
     setTimerButtonStates();
 }
 
@@ -800,205 +762,6 @@ const renderRules = function ()
 
         elementRules.appendChild(clone);
     }
-}
-
-
-/**
- * Saves data
- * @param {StateStorageEntity} cfg 
- */
-const saveToStorage = function (cfg)
-{
-    if (cfg.hasOwnProperty("timerState"))
-    {
-        if (cfg.timerState == null || cfg.timerState == '')
-        {
-            localStorage.removeItem(STORAGE_NAME_TIMER_STATE);
-        }
-        else
-        {
-            localStorage.setItem(STORAGE_NAME_TIMER_STATE, cfg.timerState);
-        }
-    }
-
-    if (cfg.hasOwnProperty("subathonTimeLeftInSeconds"))
-    {
-        if (cfg.subathonTimeLeftInSeconds == null)
-        {
-            localStorage.removeItem(STORAGE_NAME_SUBATHON_TIME);
-        }
-        else
-        {
-            localStorage.setItem(STORAGE_NAME_SUBATHON_TIME, cfg.subathonTimeLeftInSeconds);
-        }
-    }
-
-    if (cfg.hasOwnProperty("subathonDurationInSeconds"))
-    {
-        if (cfg.subathonDurationInSeconds == null)
-        {
-            localStorage.removeItem(STORAGE_NAME_SUBATHON_DURATION);
-        }
-        else
-        {
-            localStorage.setItem(STORAGE_NAME_SUBATHON_DURATION, cfg.subathonDurationInSeconds);
-        }
-    }
-
-    if (cfg.hasOwnProperty("atCurrentRuleIndex"))
-    {
-        if (cfg.atCurrentRuleIndex == null)
-        {
-            localStorage.removeItem(STORAGE_NAME_SUBATHON_RULE_INDEX);
-        }
-        else
-        {
-            localStorage.setItem(STORAGE_NAME_SUBATHON_RULE_INDEX, cfg.atCurrentRuleIndex);
-        }
-    }
-
-    if (cfg.hasOwnProperty("channelName"))
-    {
-        if (cfg.channelName == null || cfg.channelName == '')
-        {
-            localStorage.removeItem(STORAGE_NAME_CHANNEL_NAME);
-        }
-        else
-        {
-            localStorage.setItem(STORAGE_NAME_CHANNEL_NAME, cfg.channelName);
-        }
-    }
-
-    if (cfg.hasOwnProperty("initTimerValue"))
-    {
-        if (cfg.initTimerValue == null || cfg.initTimerValue == '')
-        {
-            localStorage.removeItem(STORAGE_NAME_INIT_TIME);
-        }
-        else
-        {
-            localStorage.setItem(STORAGE_NAME_INIT_TIME, cfg.initTimerValue);
-        }
-    }
-
-    if (cfg.hasOwnProperty("stopTimerOnZero"))
-    {
-        if (cfg.stopTimerOnZero == null)
-        {
-            localStorage.removeItem(STORAGE_NAME_STOP_ON_ZERO);
-        }
-        else
-        {
-            localStorage.setItem(STORAGE_NAME_STOP_ON_ZERO, cfg.stopTimerOnZero ? 1 : 0);
-        }
-    }
-
-    if (cfg.hasOwnProperty("timeRules"))
-    {
-        if (cfg.timeRules == null)
-        {
-            localStorage.removeItem(STORAGE_NAME_RULES);
-        }
-        else
-        {
-            localStorage.setItem(STORAGE_NAME_RULES, JSON.stringify(cfg.timeRules));
-        }
-    }
-}
-
-
-/**
- * Loads data
- * @param {StateStorageEntity} cfg 
- */
-const loadFromStorage = function (cfg)
-{
-    if (cfg.hasOwnProperty("timerState"))
-    {
-        const val = localStorage.getItem(STORAGE_NAME_TIMER_STATE);
-        if (val != null && val != '')
-        {
-            cfg.timerState = val;
-        }
-    }
-
-    if (cfg.hasOwnProperty("subathonTimeLeftInSeconds"))
-    {
-        const val = localStorage.getItem(STORAGE_NAME_SUBATHON_TIME);
-        const num = val - 0;
-        if (val !== '' && !isNaN(num))
-        {
-            cfg.subathonTimeLeftInSeconds = num;
-        }
-    }
-
-    if (cfg.hasOwnProperty("subathonDurationInSeconds"))
-    {
-        const val = localStorage.getItem(STORAGE_NAME_SUBATHON_DURATION) - 0;
-        const num = val - 0;
-        if (val != '' && !isNaN(num))
-        {
-            cfg.subathonDurationInSeconds = num;
-        }
-    }
-
-    if (cfg.hasOwnProperty("atCurrentRuleIndex"))
-    {
-        const val = localStorage.getItem(STORAGE_NAME_SUBATHON_RULE_INDEX) - 0;
-        const num = val - 0;
-        if (val !== '' && !isNaN(num))
-        {
-            cfg.atCurrentRuleIndex = num;
-        }
-    }
-
-    if (cfg.hasOwnProperty("channelName"))
-    {
-        const val = localStorage.getItem(STORAGE_NAME_CHANNEL_NAME);
-        if (val != null && val != '')
-        {
-            cfg.channelName = val;
-        }
-    }
-
-    if (cfg.hasOwnProperty("initTimerValue"))
-    {
-        const val = localStorage.getItem(STORAGE_NAME_INIT_TIME) - 0;
-        const num = val - 0;
-        if (val !== '' && !isNaN(num))
-        {
-            cfg.initTimerValue = num;
-        }
-    }
-
-    if (cfg.hasOwnProperty("stopTimerOnZero"))
-    {
-        const val = localStorage.getItem(STORAGE_NAME_STOP_ON_ZERO) - 0;
-        const num = val - 0;
-        if (val !== '' && !isNaN(num))
-        {
-            cfg.stopTimerOnZero = num === 1;
-        }
-    }
-
-    if (cfg.hasOwnProperty("timeRules"))
-    {
-        const val = localStorage.getItem(STORAGE_NAME_RULES);
-        if (val != null && val != '')
-        {
-            try
-            {
-                const json = JSON.parse(val);
-                cfg.timeRules = json;
-            }
-            catch (error)
-            {
-                console.error('Could not parse timeRules from storage!', error);
-            }
-        }
-    }
-
-    return cfg;
 }
 
 
@@ -1044,6 +807,7 @@ const handleRuleTimeCode = function (index, rule)
         if (isNaN(newThreshold))
         {
             e.target.value = formatSecondsToTimecode(timeCode.dataset.value);
+            animateError(e.target);
             return;
         }
 
@@ -1073,9 +837,10 @@ const handleRuleValue = function (index, rule)
     const saveNewValue = function (e)
     {
         const newValue = e.target.value - 0;
-        if (isNaN(newValue))
+        if (isNaN(newValue) || newValue === 0)
         {
             e.target.value = timeValue.dataset.value;
+            animateError(e.target);
             return;
         }
 
@@ -1111,115 +876,6 @@ const handleRuleUnit = function (index, rule)
 }
 
 
-/**
- * Tries to parse a timecode string to total seconds.
- * 1h 2m 3s also supported
- * @param {string} raw 
- */
-const tryAndParseTimeCode = function (raw)
-{
-    let parts = raw.split(':');
-    if (parts.length == 1 && parts[0] === '')
-    {
-        parts = [];
-    }
-
-    const isTextBased = raw.indexOf('h') !== -1 || raw.indexOf('m') !== -1 || raw.indexOf('s') !== -1;
-
-    if (parts.length > 0 && !isTextBased)
-    {
-        if (parts.length === 1)
-        {
-            return parts[0] - 0;
-        }
-
-        if (parts.length === 2)
-        {
-            return ((parts[0] - 0) * 60) + (parts[1] - 0);
-        }
-
-        if (parts.length === 3)
-        {
-            return ((parts[0] - 0) * 60 * 60) + ((parts[1] - 0) * 60) + (parts[2] - 0);
-        }
-    }
-
-    parts = raw.split(' ');
-    if (parts.length == 1 && parts[0] === '')
-    {
-        parts = [];
-    }
-
-    if (parts.length > 0 && isTextBased)
-    {
-        let totalSeconds = 0;
-        for (let i = 0; i < parts.length; i++)
-        {
-            const part = parts[i];
-            if (part.length <= 1)
-            {
-                continue;
-            }
-
-            const value = part.substring(0, part.length - 1);
-            const unit = part.slice(-1);
-
-            if (unit === 'h')
-            {
-                totalSeconds += (value - 0) * 60 * 60;
-            }
-            else if (unit === 'm')
-            {
-                totalSeconds += (value - 0) * 60;
-            }
-            else if (unit === 's')
-            {
-                totalSeconds += value - 0;
-            }
-        }
-
-        return totalSeconds;
-    }
-
-    return NaN;
-}
-
-
-/**
- * Formats seconds to timecode
- * @param {number} threshold 
- */
-const formatSecondsToTimecode = function (threshold)
-{
-    const hours = Math.floor(threshold / 3600)
-    const minutes = Math.floor(threshold / 60) % 60
-    const seconds = threshold % 60
-
-    return [hours, minutes, seconds]
-        .map(v => v < 10 ? "0" + v : v)
-        .join(":")
-}
-
-
-/**
- * Converts the value with a unit to get to total seconds
- * @param {number} value
- * @param {'h'|'m'|'s'} unit
- */
-const getTotalSecondsWithUnit = function (value, unit)
-{
-    if (unit === 'h')
-    {
-        return value * 24 * 60;
-    }
-
-    if (unit === 'm')
-    {
-        return value * 60;
-    }
-
-    return value;
-}
 
 
 setElementEventListeners();

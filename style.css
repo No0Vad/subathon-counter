@@ -32,8 +32,13 @@ input {
     padding: 5px 10px;
 }
 
+.error {
+    transition: background-color 1s;
+    background-color: red;
+}
+
 button[disabled], button[disabled] label, input[disabled], select[disabled] {
-    cursor: not-allowed
+    cursor: not-allowed;
 }
 
 select {
