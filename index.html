@@ -9,9 +9,10 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
 
-    <link rel="stylesheet" type="text/css" href="./style.css?v=1" />
-    <script defer src="./tmi.min.js?v=1.1"></script>
-    <script defer type="module" src="./script.js?v=1.1"></script>
+    <link rel="stylesheet" type="text/css" href="./css/theme.css?v=1.2" />
+    <link rel="stylesheet" type="text/css" href="./css/style.css?v=1.2" />
+    <script defer src="./js/tmi.min.js?v=1.2"></script>
+    <script defer type="module" src="./js/script.js?v=1.2"></script>
 </head>
 
 <body>
@@ -29,9 +30,17 @@
                 00:00:00
             </span>
         </div>
+
+        <input type="color" class="color-picker background-color" data-node="timerBackgroundColor" />
+        <input type="color" class="color-picker text-color" data-node="timerTextColor" />
     </div>
 
     <div class="content">
+        <div class="theme-toggle" data-node="themeToggle">
+            <span class="light emoji">☀</span>
+            <span class="dark emoji">🌙</span>
+        </div>
+
         <div class="counter-info">
             <strong>Subathon time left and current duration of the subathon.</strong>
         </div>
@@ -75,8 +84,8 @@
         <div class="time-rules">
             <h2>Rules</h2>
             <div class="help">
-                The time rules define how much a time each sub increases the timer.<br />
-                A rule of 00:00:00 acts as the start value.<br />
+                These rules define how much a sub increases the timer. A rule of 00:00:00 acts as the start value.<br />
+                A rule is considered "done" once the <strong>sub timer (left)</strong> or the <strong>duration timer (right)</strong> passes the value entered.<br />
                 Once the timer starts, you cannot change the rules.
             </div>
 

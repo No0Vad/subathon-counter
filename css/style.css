@@ -1,0 +1,238 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Helvetica;
+    background: var(--background-color);
+    color: var(--text-color);
+}
+
+button {
+    padding: 10px;
+    width: 140px;
+    margin-bottom: 5px;
+    background-color: var(--button-background-color);
+    border: none;
+    border-radius: 4px;
+    color: var(--button-text-color);
+}
+
+button:not([disabled]):hover {
+    background-color: var(--button-background-color-hover);
+}
+
+button:not([disabled]):active {
+    background-color: var(--button-background-color-active);
+}
+
+button.hasLabel {
+    padding: 0;
+}
+
+button.hasLabel label {
+    display: block;
+    padding: 10px;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid var(--input-border-color);
+    background-color: var(--input-background-color);
+    color: var(--input-text-color);
+    border-radius: 4px;
+}
+
+.error {
+    transition: background-color 500ms;
+    background-color: red;
+}
+
+button[disabled], button[disabled] label, input[disabled], select[disabled] {
+    cursor: not-allowed;
+    background: var(--button-background-color-disabled);
+}
+
+button[disabled] .emoji {
+    filter: grayscale(1);
+    opacity: 0.5;
+}
+
+input[disabled], select[disabled] {
+    opacity: 1;
+    background: var(--input-background-color-disabled);
+}
+
+select {
+    padding: 10px;
+    background-color: var(--input-background-color);
+    border: 1px solid var(--input-border-color);
+    border-radius: 4px;
+    color: var(--input-text-color);
+}
+
+.emoji {
+    font-weight: 400;
+    font-family: apple color emoji, segoe ui emoji, noto color emoji, android emoji, emojisymbols, emojione mozilla, twemoji mozilla, segoe ui symbol;
+}
+
+.counters {
+    background-color: var(--timer-background-color);
+    display: inline-block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+}
+
+.color-picker {
+    height: 24px;
+    width: 24px;
+    padding: 0;
+}
+
+.color-picker.background-color {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+}
+
+.color-picker.text-color {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+}
+
+.formatted-output {
+    color: var(--timer-text-color);
+    -webkit-font-smoothing: none;
+    font-smooth: never;
+}
+
+.counter {
+    padding: 20px 40px;
+    color: black;
+    font-size: 40px;
+    font-family: 'Consolas';
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.counter-info {
+    margin: 10px 0 25px 0;
+}
+
+.content {
+    padding: 20px;
+    margin: 100px 10px 10px 10px;
+    background-color: var(--content-background-color);
+    border: 1px solid var(--content-border-color);
+    border-radius: 10px;
+    position: relative;
+}
+
+.content .theme-toggle {
+    position: absolute;
+    cursor: pointer;
+    right: 10px;
+    top: 10px;
+    user-select: none;
+}
+
+.content .theme-toggle span {
+    display: none;
+}
+
+.theme-light .content .theme-toggle span.dark {
+    display: inline;
+}
+
+.theme-dark .content .theme-toggle span.light {
+    display: inline;
+}
+
+.channel, .autoStopOnZero {
+    margin: 10px 0;
+}
+
+.time-rules, .time-manipulation {
+    margin-top: 30px;
+}
+
+.help {
+    margin-bottom: 20px;
+}
+
+.rules {
+    margin: 20px 0;
+}
+
+.rules button {
+    margin-bottom: 0;
+}
+
+.rule {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rules-seperator-color);
+}
+
+.rule:last-child {
+    border-bottom: none;
+}
+
+.rule.active, .rule.active input, .rule.active select {
+    color: var(--active-rule-color);
+}
+
+.rule.active:after {
+    content: ' 👈';
+    font-weight: 400;
+    font-family: apple color emoji, segoe ui emoji, noto color emoji, android emoji, emojisymbols, emojione mozilla, twemoji mozilla, segoe ui symbol;
+}
+
+.timeCode {
+    width: 75px;
+    text-align: center;
+    margin: 0 5px;
+}
+
+.timeValue {
+    width: 30px;
+    text-align: center;
+    margin-left: 5px;
+}
+
+.timeUnit {
+    margin-right: 5px;
+}
+
+.removeTimeRule {
+    margin-right: 15px;
+    background-color: var(--button-remove-background-color);
+}
+
+.removeTimeRule:not([disabled]):hover {
+    background-color: var(--button-remove-background-color-hover);
+}
+
+.removeTimeRule:not([disabled]):active {
+    background-color: var(--button-remove-background-color-active);
+}
+
+.removeTimeRule[disabled] {
+    background-color: var(--button-remove-background-color-disabled);
+}
+
+.confirm-button:not(.confirm) .confirm {
+    display: none;
+}
+
+.confirm-button.confirm .confirm {
+    display: inline;
+}
+
+.confirm-button.confirm .normal {
+    display: none;
+}

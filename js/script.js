@@ -1,5 +1,6 @@
 import { handleConfirmButton, animateError, getArrayNextIndexSafe, tryAndParseTimeCode, formatSecondsToTimecode, getTotalSecondsWithUnit } from './util.js';
 import { saveToStorage, loadFromStorage } from './storage.js';
+import { registerTheme } from './theme.js';
 
 let queueProcessorInterval;
 let everySecondInterval;
@@ -15,6 +16,8 @@ let isProcessingQueue = false;
 
 /** @type {HTMLElement} */ const elementTimeFormatted = document.querySelector('[data-node="timeFormatted"]');
 /** @type {HTMLElement} */ const elementDurationFormatted = document.querySelector('[data-node="durationFormatted"]');
+/** @type {HTMLInputElement} */ const inputTimerBackgroundColor = document.querySelector('[data-node="timerBackgroundColor"]');
+/** @type {HTMLInputElement} */ const inputTimerTextColor = document.querySelector('[data-node="timerTextColor"]');
 /** @type {HTMLButtonElement} */ const buttonTimerStart = document.querySelector('[data-node="timerStart"]');
 /** @type {HTMLButtonElement} */ const buttonTimerPause = document.querySelector('[data-node="timerPause"]');
 /** @type {HTMLButtonElement} */ const buttonTimerResume = document.querySelector('[data-node="timerResume"]');
@@ -39,6 +42,9 @@ let isProcessingQueue = false;
 
 /**
  * @typedef StateStorageEntity
+ * @property {string} timerBackgroundColor - The background color of the timer
+ * @property {string} timerTextColor - The text color of the timer
+ * 
  * @property {string} timerState - The timer state
  * @property {number} subathonTimeLeftInSeconds - Seconds left of the Subathon timer
  * @property {number} subathonDurationInSeconds - Duration of the Subathon timer in seconds
@@ -52,6 +58,8 @@ let isProcessingQueue = false;
 
 /**
  * @typedef ExportPayloadEntity
+ * @property {string} timerBackgroundColor - The background color of the timer
+ * @property {string} timerTextColor - The text color of the timer
  * @property {string} channelName - Channel name to monitor
  * @property {string} initTimerValue - Value to start the timer on
  * @property {boolean} stopTimerOnZero - Stop once timer reaches zero
@@ -319,7 +327,13 @@ const setVisualActiveRule = function (index)
  */
 const loadStorageDataIfAny = function ()
 {
+    const root = document.documentElement;
+    const rootStyle = getComputedStyle(root);
+
     const loaded = loadFromStorage({
+        timerBackgroundColor: rootStyle.getPropertyValue('--timer-background-color').trim(),
+        timerTextColor: rootStyle.getPropertyValue('--timer-text-color').trim(),
+
         timerState: timerState,
         channelName: '',
         initTimerValue: null,
@@ -330,6 +344,14 @@ const loadStorageDataIfAny = function ()
         subathonDurationInSeconds: null,
         atCurrentRuleIndex: null
     });
+
+    // Do we have the timer background color saved?
+    inputTimerBackgroundColor.value = loaded.timerBackgroundColor;
+    root.style.setProperty('--timer-background-color', loaded.timerBackgroundColor);
+
+    // Do we have the timer text color saved?
+    inputTimerTextColor.value = loaded.timerTextColor;
+    root.style.setProperty('--timer-text-color', loaded.timerTextColor);
 
     // Do we have a timer state saved?
     timerState = loaded.timerState;
@@ -391,6 +413,18 @@ const loadStorageDataIfAny = function ()
  */
 const setElementEventListeners = function ()
 {
+    inputTimerBackgroundColor.addEventListener('change', e =>
+    {
+        document.documentElement.style.setProperty('--timer-background-color', e.target.value);
+        saveToStorage({ timerBackgroundColor: e.target.value });
+    });
+
+    inputTimerTextColor.addEventListener('change', e =>
+    {
+        document.documentElement.style.setProperty('--timer-text-color', e.target.value);
+        saveToStorage({ timerTextColor: e.target.value });
+    });
+
     buttonTimerStart.addEventListener('click', e =>
     {
         if (inputChannelName.value.length === 0)
@@ -509,6 +543,9 @@ const setElementEventListeners = function ()
     {
         /** @type {ExportPayloadEntity} */
         const payload = {
+            timerBackgroundColor: inputTimerBackgroundColor.value,
+            timerTextColor: inputTimerTextColor.value,
+
             channelName: inputChannelName.value,
             initTimerValue: inputInitTimerValue.dataset.seconds,
             stopTimerOnZero: inputStopTimerOnZero.checked,
@@ -530,15 +567,21 @@ const setElementEventListeners = function ()
             {
                 /** @type {ExportPayloadEntity} */
                 const payload = JSON.parse(e2.target.result);
-                console.log(payload);
 
+                inputTimerBackgroundColor.value = payload.timerBackgroundColor;
+                inputTimerTextColor.value = payload.timerTextColor;
                 inputChannelName.value = payload.channelName;
                 inputInitTimerValue.value = formatSecondsToTimecode(payload.initTimerValue);
                 inputStopTimerOnZero.checked = payload.stopTimerOnZero;
                 timeRules = payload.timeRules;
                 renderRules();
 
+                document.documentElement.style.setProperty('--timer-background-color', payload.timerBackgroundColor);
+                document.documentElement.style.setProperty('--timer-text-color', payload.timerTextColor);
+
                 saveToStorage({
+                    timerBackgroundColor: payload.timerBackgroundColor,
+                    timerTextColor: payload.timerTextColor,
                     channelName: payload.channelName,
                     initTimerValue: payload.initTimerValue,
                     stopTimerOnZero: payload.stopTimerOnZero,
@@ -550,6 +593,7 @@ const setElementEventListeners = function ()
             catch (error)
             {
                 alert('Import Failed! Content might be corrupted or invalid');
+                console.error(error);
             }
         };
         reader.readAsText(e.target.files[0]);
@@ -877,7 +921,7 @@ const handleRuleUnit = function (index, rule)
 
 
 
-
+registerTheme();
 setElementEventListeners();
 loadStorageDataIfAny();
 setTimerButtonStates();
