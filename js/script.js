@@ -10,6 +10,9 @@ let subathonDurationInSeconds = 0;
 let atCurrentRuleIndex = 0;
 let isProcessingQueue = false;
 
+const regexValidUsername = /^[A-Za-z0-9_]+$/;
+const regexIsGiftSubToSpecificUser = /gifted a (.+?) sub to (.+?)!/;
+
 
 /** @type {HTMLAnchorElement} */ const elementExportFile = document.getElementById('exportFile');
 /** @type {HTMLInputElement} */ const elementImportFile = document.getElementById('importFile');
@@ -171,6 +174,16 @@ const setTimerButtonStates = function ()
 
 
 /**
+ * Adds subscribers to the queue, so the timer will be increased once processed
+ * @param {number} count 
+ */
+const addSubscriberToTheTimer = function (count)
+{
+    processQueue.push(count);
+}
+
+
+/**
  * Starts the Twitch Chat Client
  */
 const startChatClient = function ()
@@ -193,7 +206,7 @@ const startChatClient = function ()
         }
 
         console.log(`New sub - ${username}`);
-        processQueue.push(1);
+        addSubscriberToTheTimer(1);
     });
 
     client.on('resub', (channel, username, months, message, userstate, methods) =>
@@ -204,7 +217,7 @@ const startChatClient = function ()
         }
 
         console.log(`Resub - ${username}`);
-        processQueue.push(1);
+        addSubscriberToTheTimer(1);
     });
 
     client.on('subgift', (channel, username, streakMonths, recipient, methods, userstate) =>
@@ -214,8 +227,23 @@ const startChatClient = function ()
             return;
         }
 
-        console.log(`User ${recipient} was given a gift sub from ${username}`);
-        processQueue.push(1);
+        /*
+         * NOTE:
+         * When X giftsubs are given 'submysterygift' is first fired, then 'subgift' is fired for each recipient.
+         * Using both would duplicate the sub time.
+         * 
+         * However, this is only called when gifting a sub to someone directly and this is one way of checking it
+         */
+
+        if (regexIsGiftSubToSpecificUser.test(userstate['system-msg']))
+        {
+            console.log(`User ${recipient} was given a gift sub from ${username}`);
+            addSubscriberToTheTimer(1);
+        }
+
+        const obj = { channel, username, streakMonths, recipient, methods, userstate }
+        console.log(obj);
+        console.log(JSON.stringify(obj));
     });
 
     client.on('submysterygift', (channel, username, numbOfSubs, methods, userstate) =>
@@ -226,7 +254,7 @@ const startChatClient = function ()
         }
 
         console.log(`${numbOfSubs} subs was given to the chat from ${username}!`);
-        processQueue.push(numbOfSubs - 0);
+        addSubscriberToTheTimer(numbOfSubs - 0);
     });
 
     client.on('giftpaidupgrade', (channel, username, sender, userstate) =>
@@ -235,6 +263,24 @@ const startChatClient = function ()
         {
             return;
         }
+
+        /**
+         * NOTE:
+         * This does not count as a new sub
+         */
+    });
+
+    client.on('anongiftpaidupgrade', (channel, username, sender, userstate) =>
+    {
+        if (timerState !== 'started')
+        {
+            return;
+        }
+
+        /**
+         * NOTE:
+         * This does not count as a new sub
+         */
     });
 
     client.on('connecting', (address, port) =>
@@ -244,7 +290,7 @@ const startChatClient = function ()
 
     client.on('connected', (address, port) =>
     {
-        console.log(`Connection ${address}:${port} established!`);
+        console.log(`Connection to ${address}:${port} was established!`);
     });
 
     client.on('disconnected', (reason) =>
@@ -259,7 +305,7 @@ const startChatClient = function ()
 
     client.connect();
 
-    console.log(`Chat Client started, listening on ${inputChannelName.value}`);
+    console.log(`Chat Client starting...`);
 }
 
 
@@ -271,6 +317,8 @@ const stopChatClient = function ()
     if (client)
     {
         client.disconnect();
+        client.removeAllListeners();
+        console.log('Removing all listeners');
     }
 
     client = null;
@@ -430,6 +478,12 @@ const setElementEventListeners = function ()
         if (inputChannelName.value.length === 0)
         {
             alert('You must enter the channel name for the bot to monitor!');
+            return;
+        }
+
+        if (!regexValidUsername.test(inputChannelName.value))
+        {
+            alert('Not a valid username!');
             return;
         }
 
@@ -925,3 +979,8 @@ registerTheme();
 setElementEventListeners();
 loadStorageDataIfAny();
 setTimerButtonStates();
+
+
+
+// Expose it for those who wnat to use it through the console
+window.addSubscriberToTheTimer = addSubscriberToTheTimer;
