@@ -192,7 +192,7 @@ const startChatClient = function ()
             return;
         }
 
-        console.log('New sub');
+        console.log(`New sub - ${username}`);
         processQueue.push(1);
     });
 
@@ -203,7 +203,7 @@ const startChatClient = function ()
             return;
         }
 
-        console.log('Resub');
+        console.log(`Resub - ${username}`);
         processQueue.push(1);
     });
 
@@ -214,7 +214,7 @@ const startChatClient = function ()
             return;
         }
 
-        console.log('A specific user was given a gift sub');
+        console.log(`User ${recipient} was given a gift sub from ${username}`);
         processQueue.push(1);
     });
 
@@ -225,7 +225,7 @@ const startChatClient = function ()
             return;
         }
 
-        console.log(numbOfSubs + ' subs was given to the chat!');
+        console.log(`${numbOfSubs} subs was given to the chat from ${username}!`);
         processQueue.push(numbOfSubs - 0);
     });
 
