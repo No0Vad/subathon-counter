@@ -1,4 +1,8 @@
-import { handleConfirmButton, animateError, getArrayNextIndexSafe, tryAndParseTimeCode, formatSecondsToTimecode, getTotalSecondsWithUnit } from './util.js';
+import
+{
+    handleConfirmButton, animateError, getArrayNextIndexSafe, tryAndParseTimeCode, formatSecondsToTimecode,
+    getTotalSecondsWithUnit, cssClassStateOnElement
+} from './util.js';
 import { saveToStorage, loadFromStorage } from './storage.js';
 import { registerTheme } from './theme.js';
 
@@ -21,6 +25,7 @@ const regexValidUsername = /^[A-Za-z0-9_]+$/;
 /** @type {HTMLElement} */ const elementDurationFormatted = document.querySelector('[data-node="durationFormatted"]');
 /** @type {HTMLInputElement} */ const inputTimerBackgroundColor = document.querySelector('[data-node="timerBackgroundColor"]');
 /** @type {HTMLInputElement} */ const inputTimerTextColor = document.querySelector('[data-node="timerTextColor"]');
+/** @type {HTMLInputElement} */ const elementBotConnectivity = document.querySelector('[data-node="botConnectivity"]');
 /** @type {HTMLButtonElement} */ const buttonTimerStart = document.querySelector('[data-node="timerStart"]');
 /** @type {HTMLButtonElement} */ const buttonTimerPause = document.querySelector('[data-node="timerPause"]');
 /** @type {HTMLButtonElement} */ const buttonTimerResume = document.querySelector('[data-node="timerResume"]');
@@ -288,11 +293,13 @@ const startChatClient = function ()
     client.on('connected', (address, port) =>
     {
         console.log(`Connection to ${address}:${port} was established!`);
+        cssClassStateOnElement(elementBotConnectivity, true, 'connected', 'disconnected');
     });
 
     client.on('disconnected', (reason) =>
     {
         console.log(`Connection lost! ${reason}`);
+        cssClassStateOnElement(elementBotConnectivity, false, 'connected', 'disconnected');
     });
 
     client.on('reconnect', () =>
@@ -318,6 +325,8 @@ const stopChatClient = function ()
         console.log('Removing all listeners');
     }
 
+    
+    cssClassStateOnElement(elementBotConnectivity, null, 'connected', 'disconnected');
     client = null;
 
     console.log('Chat Client stopped');
@@ -984,4 +993,5 @@ setTimerButtonStates();
 // Expose it for those who wnat to use it through the console
 window.addSubscriberToTheTimer = addSubscriberToTheTimer;
 
+// Expose possibility to change logChatDetails variable
 window.setLogChatDetails = state => logChatDetails = state;

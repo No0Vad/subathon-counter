@@ -176,6 +176,53 @@ const getTotalSecondsWithUnit = function (value, unit)
 }
 
 
+/**
+ * Helper for toggling a state class on a HTMLElement
+ * @param {HTMLElement} element 
+ * @param {boolean} state 
+ * @param {string} trueValue 
+ * @param {string} falseValue 
+ * @param {string} nullValue 
+ * @returns 
+ */
+const cssClassStateOnElement = function (element, state, trueValue, falseValue, nullValue)
+{
+    if (state === true)
+    {
+        element.classList.add(trueValue);
+        element.classList.remove(falseValue);
+
+        if (nullValue != null)
+        {
+            element.classList.remove(nullValue);
+        }
+
+        return;
+    }
+
+    if (state === false)
+    {
+        element.classList.remove(trueValue);
+        element.classList.add(falseValue);
+
+        if (nullValue != null)
+        {
+            element.classList.remove(nullValue);
+        }
+
+        return;
+    }
+
+    element.classList.remove(trueValue);
+    element.classList.remove(falseValue);
+
+    if (nullValue != null)
+    {
+        element.classList.add(nullValue);
+    }
+}
+
+
 export
 {
     handleConfirmButton,
@@ -183,5 +230,6 @@ export
     getArrayNextIndexSafe,
     tryAndParseTimeCode,
     formatSecondsToTimecode,
-    getTotalSecondsWithUnit
+    getTotalSecondsWithUnit,
+    cssClassStateOnElement
 }

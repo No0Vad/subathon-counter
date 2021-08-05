@@ -87,22 +87,43 @@ select {
     z-index: 9999;
 }
 
+.color-pickers {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    height: 24px;
+    text-align: center;
+}
+
+.color-pickers input {
+    margin-left: 2px;
+}
+
 .color-picker {
     height: 24px;
     width: 24px;
     padding: 0;
 }
 
-.color-picker.background-color {
-    position: absolute;
-    right: 5px;
-    top: 5px;
-}
-
-.color-picker.text-color {
+.bot-connectivity {
+    display: inline-block;
     position: absolute;
     right: 5px;
     bottom: 5px;
+    height: 24px;
+    text-align: center;
+}
+
+.bot-connectivity span {
+    display: none;
+}
+
+.bot-connectivity.connected span.connected {
+    display: inline;
+}
+
+.bot-connectivity.disconnected span.disconnected {
+    display: inline;
 }
 
 .formatted-output {
@@ -235,4 +256,13 @@ select {
 
 .confirm-button.confirm .normal {
     display: none;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(359deg);
+    }
 }
