@@ -9,9 +9,9 @@ let subathonTimeLeftInSeconds = 0;
 let subathonDurationInSeconds = 0;
 let atCurrentRuleIndex = 0;
 let isProcessingQueue = false;
+let logChatDetails = false;
 
 const regexValidUsername = /^[A-Za-z0-9_]+$/;
-const regexIsGiftSubToSpecificUser = /gifted a (.+?) sub to (.+?)!/;
 
 
 /** @type {HTMLAnchorElement} */ const elementExportFile = document.getElementById('exportFile');
@@ -207,6 +207,12 @@ const startChatClient = function ()
 
         console.log(`New sub - ${username}`);
         addSubscriberToTheTimer(1);
+
+        if (logChatDetails)
+        {
+            const obj = { a: 'subscription', channel, username, months, message, userstate, methods }
+            console.log(JSON.stringify(obj));
+        }
     });
 
     client.on('resub', (channel, username, months, message, userstate, methods) =>
@@ -214,6 +220,12 @@ const startChatClient = function ()
         if (timerState !== 'started')
         {
             return;
+        }
+
+        if (logChatDetails)
+        {
+            const obj = { a: 'resub', channel, username, months, message, userstate, methods }
+            console.log(JSON.stringify(obj));
         }
 
         console.log(`Resub - ${username}`);
@@ -227,23 +239,26 @@ const startChatClient = function ()
             return;
         }
 
+        if (logChatDetails)
+        {
+            const obj = { a: 'subgift', b: userstate['msg-param-sender-count'] === false, channel, username, streakMonths, recipient, methods, userstate }
+            console.log(JSON.stringify(obj));
+        }
+
         /*
          * NOTE:
          * When X giftsubs are given 'submysterygift' is first fired, then 'subgift' is fired for each recipient.
          * Using both would duplicate the sub time.
-         * 
-         * However, this is only called when gifting a sub to someone directly and this is one way of checking it
          */
-
-        if (regexIsGiftSubToSpecificUser.test(userstate['system-msg']))
+        if (userstate['msg-param-sender-count'] === false)
         {
-            console.log(`User ${recipient} was given a gift sub from ${username}`);
-            addSubscriberToTheTimer(1);
+            // Event is because of submysterygift.
+            // The message: [Username] gifted a Tier X sub to [Recipient]!
+            return;
         }
 
-        const obj = { channel, username, streakMonths, recipient, methods, userstate }
-        console.log(obj);
-        console.log(JSON.stringify(obj));
+        console.log(`User ${recipient} was given a gift sub from ${username}`);
+        addSubscriberToTheTimer(1);
     });
 
     client.on('submysterygift', (channel, username, numbOfSubs, methods, userstate) =>
@@ -253,35 +268,17 @@ const startChatClient = function ()
             return;
         }
 
+        if (logChatDetails)
+        {
+            const obj = { a: 'submysterygift', channel, username, numbOfSubs, methods, userstate }
+            console.log(JSON.stringify(obj));
+        }
+
         console.log(`${numbOfSubs} subs was given to the chat from ${username}!`);
         addSubscriberToTheTimer(numbOfSubs - 0);
     });
 
-    client.on('giftpaidupgrade', (channel, username, sender, userstate) =>
-    {
-        if (timerState !== 'started')
-        {
-            return;
-        }
 
-        /**
-         * NOTE:
-         * This does not count as a new sub
-         */
-    });
-
-    client.on('anongiftpaidupgrade', (channel, username, sender, userstate) =>
-    {
-        if (timerState !== 'started')
-        {
-            return;
-        }
-
-        /**
-         * NOTE:
-         * This does not count as a new sub
-         */
-    });
 
     client.on('connecting', (address, port) =>
     {
@@ -542,6 +539,7 @@ const setElementEventListeners = function ()
             return;
         }
 
+        console.log('Manually stopping');
         timerStopButtonLogic();
     });
 
@@ -705,6 +703,7 @@ const everySecondLogic = function ()
 
     if (inputStopTimerOnZero.checked && subathonTimeLeftInSeconds <= 0)
     {
+        console.log('Timer reached 00:00:00!');
         timerStopButtonLogic();
     }
 
@@ -984,3 +983,5 @@ setTimerButtonStates();
 
 // Expose it for those who wnat to use it through the console
 window.addSubscriberToTheTimer = addSubscriberToTheTimer;
+
+window.setLogChatDetails = state => logChatDetails = state;
