@@ -12,7 +12,6 @@ body {
 button {
     padding: 10px;
     width: 140px;
-    margin-bottom: 5px;
     background-color: var(--button-background-color);
     border: none;
     border-radius: 4px;
@@ -230,7 +229,7 @@ select {
 }
 
 .removeTimeRule {
-    margin-right: 15px;
+    margin-right: 10px;
     background-color: var(--button-remove-background-color);
 }
 
@@ -264,5 +263,11 @@ select {
     }
     to {
         transform: rotate(359deg);
+    }
+}
+
+@media screen and (max-width: 740px) {
+    button, input, select {
+        margin-bottom: 5px !important;
     }
 }
