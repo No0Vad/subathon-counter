@@ -13,10 +13,10 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
 
-    <link rel="stylesheet" type="text/css" href="./css/theme.css?v=1.5" />
-    <link rel="stylesheet" type="text/css" href="./css/style.css?v=1.5" />
-    <script defer src="./js/tmi.min.js?v=1.5"></script>
-    <script defer type="module" src="./js/script.js?v=1.5"></script>
+    <link rel="stylesheet" type="text/css" href="./css/theme.css?v=1.6" />
+    <link rel="stylesheet" type="text/css" href="./css/style.css?v=1.6" />
+    <script defer src="./js/tmi.min.js?v=1.6"></script>
+    <script defer type="module" src="./js/script.js?v=1.6"></script>
 </head>
 
 <body>
@@ -29,7 +29,7 @@
                 00:00:00
             </span>
         </div>
-        <div class="counter duration">
+        <div class="counter duration duration-dependant">
             <span class="formatted-output" data-node="durationFormatted" title="Current duration of the subathon">
                 00:00:00
             </span>
@@ -46,14 +46,14 @@
         </div>
     </div>
 
+    <div class="counter-info">
+        <strong>Subathon time left<span class="duration-dependant"> and current duration of the subathon</span>.</strong>
+    </div>
+
     <div class="content">
         <div class="theme-toggle" data-node="themeToggle" title="Toggle between light and dark mode">
             <span class="light emoji">☀</span>
             <span class="dark emoji">🌙</span>
-        </div>
-
-        <div class="counter-info">
-            <strong>Subathon time left and current duration of the subathon.</strong>
         </div>
 
         <div class="timer-controls">
@@ -78,16 +78,23 @@
                 <span class="normal">Stop and reset</span>
             </button>
 
-            <div class="channel">
-                Channel name to monitor <input type="text" placeholder="the_best_streamer" data-node="channelName" />
-            </div>
-            <div class="timerStartValue">
-                Initial timer value <input type="text" class="timeCode" placeholder="00:00:00" data-node="initTimerValue" />
-            </div>
-            <div class="autoStopOnZero">
-                <label>
-                    <input type="checkbox" data-node="stopTimerOnZero" /> Auto stop once the subathon timer reaches 0 seconds.
-                </label>
+            <div class="timer-options">
+                <div>
+                    Channel name to monitor <input type="text" placeholder="the_best_streamer" data-node="channelName" />
+                </div>
+                <div>
+                    Initial timer value <input type="text" class="timeCode" placeholder="00:00:00" data-node="initTimerValue" />
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-node="stopTimerOnZero" /> Auto stop once the subathon timer reaches 0 seconds.
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" data-node="useDurationToo" /> Include the duration of the subathon in the rules
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -95,9 +102,9 @@
         <div class="time-rules">
             <h2>Rules</h2>
             <div class="help">
-                These rules define how much a sub increases the timer. A rule of 00:00:00 acts as the start value.<br />
-                A rule is considered "done" once the <strong>sub timer (left)</strong> or the <strong>duration timer (right)</strong> passes the value entered.<br />
-                Once the timer starts, you cannot change the rules.
+                <p>These rules define how much a sub increases the timer. A rule of 00:00:00 acts as the start value.</p>
+                <p>A rule is considered "done" once the <strong>sub timer (left)</strong> <span class="duration-dependant">or the <strong>duration timer (right)</strong></span> passes the value entered.</p>
+                <p>Once the timer starts, you cannot change the rules.</p>
             </div>
 
             <button data-node="newRule"><span class="emoji">⏲</span> New Rule</button>

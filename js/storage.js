@@ -5,6 +5,7 @@ const STORAGE_NAME_RULES = 'SubCounter_TimeRules';
 const STORAGE_NAME_CHANNEL_NAME = 'SubCounter_ChannelName';
 const STORAGE_NAME_INIT_TIME = 'SubCounter_InitTimerValue';
 const STORAGE_NAME_STOP_ON_ZERO = 'SubCounter_StopTimerOnZero';
+const STORAGE_NAME_USE_DURATION_TOO = 'SubCounter_UseDurationToo';
 const STORAGE_NAME_SUBATHON_TIME = 'SubCounter_SubathonTime';
 const STORAGE_NAME_SUBATHON_DURATION = 'SubCounter_SubathonDuration';
 const STORAGE_NAME_SUBATHON_RULE_INDEX = 'SubCounter_SubathonRuleIndex';
@@ -123,6 +124,18 @@ const saveToStorage = function (cfg)
         }
     }
 
+    if (cfg.hasOwnProperty("useDurationToo"))
+    {
+        if (cfg.useDurationToo == null)
+        {
+            localStorage.removeItem(STORAGE_NAME_USE_DURATION_TOO);
+        }
+        else
+        {
+            localStorage.setItem(STORAGE_NAME_USE_DURATION_TOO, cfg.useDurationToo ? 1 : 0);
+        }
+    }
+
     if (cfg.hasOwnProperty("timeRules"))
     {
         if (cfg.timeRules == null)
@@ -151,7 +164,7 @@ const loadFromStorage = function (cfg)
             cfg.timerBackgroundColor = val;
         }
     }
-    
+
     if (cfg.hasOwnProperty("timerTextColor"))
     {
         const val = localStorage.getItem(STORAGE_NAME_TIMER_TEXT_COLOR);
@@ -160,7 +173,7 @@ const loadFromStorage = function (cfg)
             cfg.timerTextColor = val;
         }
     }
-    
+
     if (cfg.hasOwnProperty("timerState"))
     {
         const val = localStorage.getItem(STORAGE_NAME_TIMER_STATE);
@@ -226,6 +239,16 @@ const loadFromStorage = function (cfg)
         if (val !== '' && !isNaN(num))
         {
             cfg.stopTimerOnZero = num === 1;
+        }
+    }
+
+    if (cfg.hasOwnProperty("useDurationToo"))
+    {
+        const val = localStorage.getItem(STORAGE_NAME_USE_DURATION_TOO) - 0;
+        const num = val - 0;
+        if (val !== '' && !isNaN(num))
+        {
+            cfg.useDurationToo = num === 1;
         }
     }
 

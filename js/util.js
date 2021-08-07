@@ -189,38 +189,41 @@ const cssClassStateOnElement = function (element, state, trueValue, falseValue, 
 {
     if (state === true)
     {
-        element.classList.add(trueValue);
-        element.classList.remove(falseValue);
-
-        if (nullValue != null)
-        {
-            element.classList.remove(nullValue);
-        }
+        if (trueValue != null) element.classList.add(trueValue);
+        if (falseValue != null) element.classList.remove(falseValue);
+        if (nullValue != null) element.classList.remove(nullValue);
 
         return;
     }
 
     if (state === false)
     {
-        element.classList.remove(trueValue);
-        element.classList.add(falseValue);
-
-        if (nullValue != null)
-        {
-            element.classList.remove(nullValue);
-        }
+        if (trueValue != null) element.classList.remove(trueValue);
+        if (falseValue != null) element.classList.add(falseValue);
+        if (nullValue != null) element.classList.remove(nullValue);
 
         return;
     }
 
-    element.classList.remove(trueValue);
-    element.classList.remove(falseValue);
-
-    if (nullValue != null)
-    {
-        element.classList.add(nullValue);
-    }
+    if (trueValue != null) element.classList.remove(trueValue);
+    if (falseValue != null) element.classList.remove(falseValue);
+    if (nullValue != null) element.classList.add(nullValue);
 }
+
+
+/**
+ * Creates and sends a event
+ * @param {HTMLElement} element The element to raise the event on
+ * @param {string} eventName The name of the event
+ * @param {boolean} [bubbles=true] Default true
+ * @param {boolean} [cancelable=false] Default false
+ */
+const sendEvent = function (element, eventName, bubbles, cancelable)
+{
+    const ev = document.createEvent('Event');
+    ev.initEvent(eventName, bubbles || true, cancelable || false);
+    element.dispatchEvent(ev);
+};
 
 
 export
@@ -231,5 +234,6 @@ export
     tryAndParseTimeCode,
     formatSecondsToTimecode,
     getTotalSecondsWithUnit,
-    cssClassStateOnElement
+    cssClassStateOnElement,
+    sendEvent
 }

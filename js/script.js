@@ -1,7 +1,7 @@
 import
 {
     handleConfirmButton, animateError, getArrayNextIndexSafe, tryAndParseTimeCode, formatSecondsToTimecode,
-    getTotalSecondsWithUnit, cssClassStateOnElement
+    getTotalSecondsWithUnit, cssClassStateOnElement, sendEvent
 } from './util.js';
 import { saveToStorage, loadFromStorage } from './storage.js';
 import { registerTheme } from './theme.js';
@@ -33,6 +33,7 @@ const regexValidUsername = /^[A-Za-z0-9_]+$/;
 /** @type {HTMLInputElement} */ const inputChannelName = document.querySelector('[data-node="channelName"]');
 /** @type {HTMLInputElement} */ const inputInitTimerValue = document.querySelector('[data-node="initTimerValue"]');
 /** @type {HTMLInputElement} */ const inputStopTimerOnZero = document.querySelector('[data-node="stopTimerOnZero"]');
+/** @type {HTMLInputElement} */ const inputUseDurationToo = document.querySelector('[data-node="useDurationToo"]');
 
 /** @type {HTMLButtonElement} */ const buttonNewRule = document.querySelector('[data-node="newRule"]');
 /** @type {HTMLButtonElement} */ const buttonSaveRules = document.querySelector('[data-node="saveRules"]');
@@ -61,6 +62,7 @@ const regexValidUsername = /^[A-Za-z0-9_]+$/;
  * @property {string} channelName - Channel name to monitor
  * @property {string} initTimerValue - Value to start the timer on
  * @property {boolean} stopTimerOnZero - Stop once timer reaches zero
+ * @property {boolean} inputUseDurationToo - Use duration too in the rules
  * @property {TimeRuleEntity[]} timeRules - The array of rules
  */
 
@@ -70,7 +72,8 @@ const regexValidUsername = /^[A-Za-z0-9_]+$/;
  * @property {string} timerTextColor - The text color of the timer
  * @property {string} channelName - Channel name to monitor
  * @property {string} initTimerValue - Value to start the timer on
- * @property {boolean} stopTimerOnZero - Stop once timer reaches zero
+ * @property {boolean} stopTimerOnZero - Use duration too in the rules
+ * @property {boolean} inputUseDurationToo - Stop once timer reaches zero
  * @property {TimeRuleEntity[]} timeRules - The array of rules
  */
 
@@ -94,7 +97,8 @@ let timerState = 'stopped';
 
 
 /**
- * Checks what the current timer state is and updates the disabled states where needed
+ * Checks what the current timer state is and updates the disabled states where needed.
+ * Also starts and stops the bot
  */
 const setTimerButtonStates = function ()
 {
@@ -107,6 +111,7 @@ const setTimerButtonStates = function ()
         inputChannelName.disabled = true;
         inputInitTimerValue.disabled = true;
         inputStopTimerOnZero.disabled = true;
+        inputUseDurationToo.disabled = true;
 
         inputManipulateValue.disabled = false;
         buttonAddTime.disabled = false;
@@ -142,6 +147,7 @@ const setTimerButtonStates = function ()
         inputChannelName.disabled = true;
         inputInitTimerValue.disabled = true;
         inputStopTimerOnZero.disabled = true;
+        inputUseDurationToo.disabled = true;
 
         inputManipulateValue.disabled = false;
         buttonAddTime.disabled = false;
@@ -159,6 +165,7 @@ const setTimerButtonStates = function ()
         inputChannelName.disabled = false;
         inputInitTimerValue.disabled = false;
         inputStopTimerOnZero.disabled = false;
+        inputUseDurationToo.disabled = false;
 
         inputManipulateValue.disabled = true;
         buttonAddTime.disabled = true;
@@ -325,7 +332,7 @@ const stopChatClient = function ()
         console.log('Removing all listeners');
     }
 
-    
+
     cssClassStateOnElement(elementBotConnectivity, null, 'connected', 'disconnected');
     client = null;
 
@@ -392,6 +399,7 @@ const loadStorageDataIfAny = function ()
         channelName: '',
         initTimerValue: null,
         stopTimerOnZero: null,
+        useDurationToo: null,
         timeRules: null,
 
         subathonTimeLeftInSeconds: null,
@@ -426,6 +434,15 @@ const loadStorageDataIfAny = function ()
     if (rawStopOnZero != null)
     {
         inputStopTimerOnZero.checked = rawStopOnZero;
+        sendEvent(inputStopTimerOnZero, 'change');
+    }
+
+    // Do we have the choice on use duration too saved?
+    const rawUseDurationToo = loaded.useDurationToo;
+    if (rawUseDurationToo != null)
+    {
+        inputUseDurationToo.checked = rawUseDurationToo;
+        sendEvent(inputUseDurationToo, 'change');
     }
 
     // Do we have some rules saved?
@@ -554,6 +571,11 @@ const setElementEventListeners = function ()
 
     inputChannelName.addEventListener('change', e => saveToStorage({ channelName: e.target.value }));
     inputStopTimerOnZero.addEventListener('change', e => saveToStorage({ stopTimerOnZero: e.target.checked }));
+    inputUseDurationToo.addEventListener('change', e =>
+    {
+        saveToStorage({ useDurationToo: e.target.checked });
+        cssClassStateOnElement(document.body, e.target.checked, 'has-duration');
+    });
 
     inputInitTimerValue.addEventListener('change', e =>
     {
@@ -610,6 +632,7 @@ const setElementEventListeners = function ()
             channelName: inputChannelName.value,
             initTimerValue: inputInitTimerValue.dataset.seconds,
             stopTimerOnZero: inputStopTimerOnZero.checked,
+            useDurationToo: inputUseDurationToo.checked,
             timeRules: timeRules
         };
 
@@ -634,8 +657,12 @@ const setElementEventListeners = function ()
                 inputChannelName.value = payload.channelName;
                 inputInitTimerValue.value = formatSecondsToTimecode(payload.initTimerValue);
                 inputStopTimerOnZero.checked = payload.stopTimerOnZero;
+                inputUseDurationToo.checked = payload.useDurationToo;
                 timeRules = payload.timeRules;
                 renderRules();
+
+                sendEvent(inputStopTimerOnZero, 'change');
+                sendEvent(inputUseDurationToo, 'change');
 
                 document.documentElement.style.setProperty('--timer-background-color', payload.timerBackgroundColor);
                 document.documentElement.style.setProperty('--timer-text-color', payload.timerTextColor);
@@ -646,6 +673,7 @@ const setElementEventListeners = function ()
                     channelName: payload.channelName,
                     initTimerValue: payload.initTimerValue,
                     stopTimerOnZero: payload.stopTimerOnZero,
+                    useDurationToo: payload.useDurationToo,
                     timeRules: payload.timeRules
                 });
 
@@ -737,7 +765,10 @@ const everySecondLogic = function ()
         subathonTimeLeftInSeconds = 0;
     }
 
-    subathonDurationInSeconds++;
+    if (inputUseDurationToo.checked)
+    {
+        subathonDurationInSeconds++;
+    }
 
     saveToStorage({
         subathonTimeLeftInSeconds: subathonTimeLeftInSeconds,
