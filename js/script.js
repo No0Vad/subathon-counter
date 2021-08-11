@@ -14,6 +14,7 @@ let subathonDurationInSeconds = 0;
 let atCurrentRuleIndex = 0;
 let isProcessingQueue = false;
 let logChatDetails = false;
+let lastSecond = null;
 
 const regexValidUsername = /^[A-Za-z0-9_]+$/;
 
@@ -124,13 +125,13 @@ const setTimerButtonStates = function ()
         {
             clearInterval(everySecondInterval);
         }
-        everySecondInterval = setInterval(everySecondLogic, 1000);
+        everySecondInterval = setInterval(everySecondLogic, 50);
 
         if (queueProcessorInterval != null)
         {
             clearInterval(queueProcessorInterval);
         }
-        queueProcessorInterval = setInterval(queueProcessorLogic, 200);
+        queueProcessorInterval = setInterval(queueProcessorLogic, 250);
 
         elementRuleEntities = Array.from(elementRules.querySelectorAll('[data-node="rule"]'));
 
@@ -734,6 +735,15 @@ const everySecondLogic = function ()
     {
         return;
     }
+
+    const currentSecond = new Date().getSeconds();
+
+    if (currentSecond == lastSecond)
+    {
+        return;
+    }
+
+    lastSecond = currentSecond;
 
     setTimerContent(subathonTimeLeftInSeconds);
     setDurationContent(subathonDurationInSeconds);
