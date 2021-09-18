@@ -254,20 +254,8 @@ const startChatClient = function ()
 
         if (logChatDetails)
         {
-            const obj = { a: 'subgift', b: userstate['msg-param-sender-count'] === false, channel, username, streakMonths, recipient, methods, userstate }
+            const obj = { a: 'subgift', channel, username, streakMonths, recipient, methods, userstate }
             console.log(JSON.stringify(obj));
-        }
-
-        /*
-         * NOTE:
-         * When X giftsubs are given 'submysterygift' is first fired, then 'subgift' is fired for each recipient.
-         * Using both would duplicate the sub time.
-         */
-        if (userstate['msg-param-sender-count'] === false)
-        {
-            // Event is because of submysterygift.
-            // The message: [Username] gifted a Tier X sub to [Recipient]!
-            return;
         }
 
         console.log(`User ${recipient} was given a gift sub from ${username}`);
@@ -287,8 +275,8 @@ const startChatClient = function ()
             console.log(JSON.stringify(obj));
         }
 
-        console.log(`${numbOfSubs} subs was given to the chat from ${username}!`);
-        addSubscriberToTheTimer(numbOfSubs - 0);
+        console.log(`(INFO ONLY) ${numbOfSubs} subs was given to the chat from ${username}!`);
+        //addSubscriberToTheTimer(numbOfSubs - 0);
     });
 
 
